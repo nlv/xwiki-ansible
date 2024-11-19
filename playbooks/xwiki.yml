@@ -1,0 +1,34 @@
+---
+- 
+  name: Устанвка xwiki
+  hosts: localhost
+  tasks:
+    - name: Включение переменных
+      include_vars: global_variables.yml
+    - name: Включение секретов
+      include_vars: secrets.yml
+    - name: Создание сетевого моста докера
+      community.docker.docker_network:
+        name: "{{ docker_network_name }}"
+    - name: Создание папки данных xwiki
+      ansible.builtin.file:
+        path: "{{ xwiki_data_folder }}"
+        state: directory
+    - name: Запуск контейнера с xwiki
+      community.docker.docker_container:
+        name: xwiki
+        image: xwiki:stable-mysql-tomcat
+        state: started
+        restart: true
+        networks:
+          - name: "{{ docker_network_name }}"
+        ports:
+          - "{{ xwiki_port }}:8080"
+        volumes:
+          - "{{ xwiki_data_folder }}:/usr/local/xwiki"
+        env:
+            DB_USER: xwiki
+            DB_PASSWORD: "{{ mysql_xwiki_password }}"
+            DB_DATABASE: xwiki
+            DB_HOST: mysql-xwiki
+

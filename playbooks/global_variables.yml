@@ -1,4 +1,8 @@
 ---
 mariadb_init_folder: /opt/nlv/mariadb-init
 mariadb_data_folder: /var/opt/nlv/mariadb-data
+
+xwiki_data_folder: /opt/nlv/xwiki
+xwiki_port: 8080
+
 docker_network_name: xwiki-nw
