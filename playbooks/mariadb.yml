@@ -1,0 +1,41 @@
+---
+- 
+  name: Установка MariaDB
+  hosts: localhost
+  tasks:
+    - name: Включение переменных
+      include_vars: global_variables.yml
+    - name: Включение секретов
+      include_vars: secrets.yml
+    - name: Создание сетевого моста докера
+      community.docker.docker_network:
+        name: "{{ docker_network_name }}"
+    - name: Создание папки базы данных mariadb
+      ansible.builtin.file:
+        path: "{{ mariadb_data_folder }}"
+        state: directory
+    - name: Создание папки со скриптами инициализации mariadb
+      ansible.builtin.file:
+        path: "{{ mariadb_init_folder }}"
+        state: directory
+    - name: Добавление скрипта инициализации mariadb
+      copy:
+        src: ../files/init.sql
+        dest: "{{ mariadb_init_folder }}/init.sql"
+    - name: Запуск контейнера с mariadb
+      community.docker.docker_container:
+        name: mysql-xwiki
+        image: mariadb:11.5
+        state: started
+        restart: true
+        networks:
+          - name: "{{ docker_network_name }}"
+        volumes:
+          - "{{ mariadb_data_folder }}:/var/lib/mysql"
+          - "{{ mariadb_init_folder }}:/docker-entrypoint-initdb.d"
+        env:
+            MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+            MYSQL_USER: xwiki
+            MYSQL_PASSWORD: "{{ mysql_xwiki_password }}"
+            MYSQL_DATABASE: xwiki
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --explicit-defaults-for-timestamp=1

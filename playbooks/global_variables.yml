@@ -1,0 +1,4 @@
+---
+mariadb_init_folder: /opt/nlv/mariadb-init
+mariadb_data_folder: /var/opt/nlv/mariadb-data
+docker_network_name: xwiki-nw
